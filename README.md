@@ -227,3 +227,56 @@ experiment and evaluation workflow maps directly to the portfolio story.
 11. Add frontend workflows for import, exploration, and question answering.
 12. Dockerize and deploy the full stack.
 
+## Local Ingestion Workflow
+
+Keep raw exports and processed conversation data out of Git. This repo ignores
+`data/raw/` and `data/processed/` by default because those folders can contain
+private conversation history.
+
+Place a ChatGPT export ZIP under `data/raw/`, then profile it:
+
+```powershell
+python scripts\profile_export.py data\raw\chatgpt-export.zip
+```
+
+Normalize the export into local JSONL files:
+
+```powershell
+python scripts\import_chatgpt_export.py data\raw\chatgpt-export.zip
+```
+
+The importer writes:
+
+- `data/processed/conversations.jsonl`
+- `data/processed/messages.jsonl`
+- `data/processed/summary.json`
+
+Run deterministic local analyses before adding embeddings or LLM synthesis:
+
+```powershell
+python scripts\analyze_messages.py
+python scripts\analyze_messages.py --search robotics
+```
+
+Extract non-text linguistic features for each message:
+
+```powershell
+python scripts\build_message_features.py
+```
+
+Generate a local Markdown profile report:
+
+```powershell
+python scripts\generate_profile_report.py
+```
+
+This first milestone should answer basic questions such as:
+
+- How many conversations and messages are in the export?
+- Which months had the most activity?
+- How long are user messages on average?
+- Which terms recur most often in user messages?
+- Which conversations contain a specific keyword or phrase?
+- Which heuristic question types are most common?
+- How do uncertainty markers and message length change over time?
+
