@@ -14,6 +14,7 @@ from insightengine.repositories.stats import (
     get_monthly_trends,
     get_overview,
     get_question_types,
+    get_topic_terms_by_month,
     get_top_terms_by_month,
     get_workflow_trends,
     get_yearly_length,
@@ -65,6 +66,14 @@ def top_terms_by_month(
     limit: int = Query(default=8, ge=1, le=25),
 ) -> dict[str, Any]:
     return get_top_terms_by_month(DATABASE_URL, months=months, limit=limit)
+
+
+@app.get("/stats/topic-terms-by-month")
+def topic_terms_by_month(
+    months: int = Query(default=12, ge=1, le=36),
+    limit: int = Query(default=8, ge=1, le=25),
+) -> dict[str, Any]:
+    return get_topic_terms_by_month(DATABASE_URL, months=months, limit=limit)
 
 
 @app.get("/stats/workflow-trends")

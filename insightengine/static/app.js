@@ -8,7 +8,7 @@ const endpoints = {
   workflowTrends: "/stats/workflow-trends",
   yearlyLength: "/stats/yearly-length",
   codeSignals: "/stats/code-signals",
-  topTermsByMonth: "/stats/top-terms-by-month?months=6&limit=6",
+  topicTermsByMonth: "/stats/topic-terms-by-month?months=6&limit=6",
   search: (query) => `/search?query=${encodeURIComponent(query)}`,
 };
 
@@ -190,7 +190,8 @@ function renderTermsByMonth(data) {
       terms.replaceChildren(
         ...month.top_terms.map((item) => {
           const term = document.createElement("span");
-          term.textContent = `${item.term} ${formatNumber.format(item.count)}`;
+          const count = item.conversation_count ?? item.count;
+          term.textContent = `${item.term} ${formatNumber.format(count)}`;
           return term;
         }),
       );
@@ -229,7 +230,7 @@ async function loadDashboard() {
     workflowTrends,
     yearlyLength,
     codeSignals,
-    topTermsByMonth,
+    topicTermsByMonth,
   ] = await Promise.all([
     fetchJson(endpoints.overview),
     fetchJson(endpoints.monthlyTrends),
@@ -237,7 +238,7 @@ async function loadDashboard() {
     fetchJson(endpoints.workflowTrends),
     fetchJson(endpoints.yearlyLength),
     fetchJson(endpoints.codeSignals),
-    fetchJson(endpoints.topTermsByMonth),
+    fetchJson(endpoints.topicTermsByMonth),
   ]);
 
   renderOverview(overview);
@@ -246,7 +247,7 @@ async function loadDashboard() {
   renderWorkflowTrends(workflowTrends);
   renderYearlyLength(yearlyLength);
   renderCodeSignals(codeSignals);
-  renderTermsByMonth(topTermsByMonth);
+  renderTermsByMonth(topicTermsByMonth);
   await runSearch(document.getElementById("searchInput").value);
 }
 

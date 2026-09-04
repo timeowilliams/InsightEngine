@@ -62,6 +62,12 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"months": []})
 
+        with patch("insightengine.api.get_topic_terms_by_month") as topic_terms:
+            topic_terms.return_value = {"months": []}
+            response = TestClient(app).get("/stats/topic-terms-by-month")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"months": []})
+
         with patch("insightengine.api.get_workflow_trends") as workflow:
             workflow.return_value = {"workflow_trends": []}
             response = TestClient(app).get("/stats/workflow-trends")

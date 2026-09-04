@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from math import log
 from typing import Any
 
 from insightengine.db import connect
@@ -151,6 +152,94 @@ def get_top_terms_by_month(
                 "top_terms": [
                     {"term": term, "count": count}
                     for term, count in terms_by_month[month].most_common(limit)
+                ],
+            }
+            for month in sorted(selected_months)
+        ]
+    }
+
+
+def get_topic_terms_by_month(
+    database_url: str,
+    months: int = 12,
+    limit: int = 8,
+) -> dict[str, Any]:
+    with connect(database_url) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT month
+                FROM message_features
+                WHERE role = 'user' AND month IS NOT NULL
+                GROUP BY month
+                ORDER BY month DESC
+                LIMIT %s
+                """,
+                (months,),
+            )
+            selected_months = [row["month"] for row in cur.fetchall()]
+            if not selected_months:
+                return {"months": []}
+
+            cur.execute(
+                """
+                SELECT mf.month, mf.conversation_id, m.text
+                FROM message_features AS mf
+                JOIN messages AS m
+                    ON m.conversation_id = mf.conversation_id
+                   AND m.message_id = mf.message_id
+                WHERE mf.role = 'user' AND mf.month = ANY(%s)
+                ORDER BY mf.month, mf.conversation_id
+                """,
+                (selected_months,),
+            )
+            rows = cur.fetchall()
+
+    conversation_terms_by_month: defaultdict[str, dict[str, set[str]]] = defaultdict(dict)
+    for row in rows:
+        month = row["month"]
+        conversation_id = row["conversation_id"]
+        terms = conversation_terms_by_month[month].setdefault(conversation_id, set())
+        terms.update(token for token in tokenize(row["text"]) if token not in STOPWORDS)
+
+    terms_by_month: defaultdict[str, Counter[str]] = defaultdict(Counter)
+    global_terms: Counter[str] = Counter()
+    for month, conversations in conversation_terms_by_month.items():
+        for terms in conversations.values():
+            terms_by_month[month].update(terms)
+            global_terms.update(terms)
+
+    total_conversation_months = sum(
+        len(conversations)
+        for conversations in conversation_terms_by_month.values()
+    )
+
+    return {
+        "months": [
+            {
+                "month": month,
+                "conversation_count": len(conversation_terms_by_month[month]),
+                "top_terms": [
+                    {
+                        "term": term,
+                        "conversation_count": count,
+                        "score": round(score, 4),
+                    }
+                    for term, count, score in sorted(
+                        (
+                            (
+                                term,
+                                count,
+                                count
+                                * log(
+                                    (1 + total_conversation_months)
+                                    / (1 + global_terms[term])
+                                ),
+                            )
+                            for term, count in terms_by_month[month].items()
+                        ),
+                        key=lambda item: (-item[2], -item[1], item[0]),
+                    )[:limit]
                 ],
             }
             for month in sorted(selected_months)

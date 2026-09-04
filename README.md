@@ -333,6 +333,7 @@ Useful endpoints:
 - `GET /stats/monthly-trends`
 - `GET /stats/question-types`
 - `GET /stats/top-terms-by-month?months=6&limit=6`
+- `GET /stats/topic-terms-by-month?months=6&limit=6`
 - `GET /stats/workflow-trends`
 - `GET /stats/code-signals`
 - `GET /stats/yearly-length`
