@@ -270,6 +270,48 @@ Generate a local Markdown profile report:
 python scripts\generate_profile_report.py
 ```
 
+Run tests:
+
+```powershell
+python -m unittest discover
+```
+
+## Local Postgres Workflow
+
+Use Docker Compose for local Postgres. This gives the project a real backend
+database while keeping setup reproducible for collaborators.
+
+Start Postgres:
+
+```powershell
+docker compose up -d postgres
+```
+
+Create tables:
+
+```powershell
+docker compose run --rm app python scripts/postgres_store.py init
+```
+
+For a local development rebuild, reset the tables:
+
+```powershell
+docker compose run --rm app python scripts/postgres_store.py reset
+```
+
+Load the normalized JSONL files into Postgres:
+
+```powershell
+docker compose run --rm app python scripts/postgres_store.py load-jsonl
+```
+
+Run deterministic database-backed analyses:
+
+```powershell
+docker compose run --rm app python scripts/postgres_store.py analyze
+docker compose run --rm app python scripts/postgres_store.py analyze --search robotics
+```
+
 This first milestone should answer basic questions such as:
 
 - How many conversations and messages are in the export?

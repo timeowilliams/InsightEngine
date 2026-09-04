@@ -4,7 +4,7 @@ import argparse
 import json
 import re
 from collections import Counter, defaultdict
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 

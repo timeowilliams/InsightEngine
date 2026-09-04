@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://insightengine:insightengine@postgres:5432/insightengine
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tools
+
+  postgres:
+    image: postgres:16
+    container_name: insightengine-postgres
+    environment:
+      POSTGRES_DB: insightengine
+      POSTGRES_USER: insightengine
+      POSTGRES_PASSWORD: insightengine
+    ports:
+      - "5432:5432"
+    volumes:
+      - insightengine-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U insightengine -d insightengine"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  insightengine-postgres-data:
