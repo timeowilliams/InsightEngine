@@ -8,7 +8,10 @@ from pathlib import Path
 from collections.abc import Iterator
 from typing import Any
 
-from profile_export import STOPWORDS, tokenize
+try:
+    from scripts.profile_export import STOPWORDS, tokenize
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from profile_export import STOPWORDS, tokenize
 
 
 def main() -> None:

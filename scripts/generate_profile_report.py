@@ -5,8 +5,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from analyze_messages import analyze_messages
-from build_message_features import build_message_features
+try:
+    from scripts.analyze_messages import analyze_messages
+    from scripts.build_message_features import build_message_features
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from analyze_messages import analyze_messages
+    from build_message_features import build_message_features
 
 
 def main() -> None:

@@ -1,1 +1,4 @@
+fastapi>=0.116,<1
+httpx2>=2.10,<3
 psycopg[binary]>=3.2,<4
+uvicorn[standard]>=0.35,<1

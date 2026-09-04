@@ -312,6 +312,34 @@ docker compose run --rm app python scripts/postgres_store.py analyze
 docker compose run --rm app python scripts/postgres_store.py analyze --search robotics
 ```
 
+## Local API Workflow
+
+Start the API and Postgres:
+
+```powershell
+docker compose up -d
+```
+
+The API runs at:
+
+```text
+http://localhost:8000
+```
+
+Useful endpoints:
+
+- `GET /health`
+- `GET /stats/overview`
+- `GET /stats/monthly-trends`
+- `GET /stats/question-types`
+- `GET /search?query=robotics`
+
+Run API and pipeline tests inside Docker:
+
+```powershell
+docker compose run --rm app python -m unittest discover
+```
+
 This first milestone should answer basic questions such as:
 
 - How many conversations and messages are in the export?

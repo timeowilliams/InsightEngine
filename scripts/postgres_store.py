@@ -7,9 +7,14 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from analyze_messages import month_from_timestamp, read_jsonl
-from build_message_features import extract_message_features
-from profile_export import STOPWORDS, tokenize
+try:
+    from scripts.analyze_messages import read_jsonl
+    from scripts.build_message_features import extract_message_features
+    from scripts.profile_export import STOPWORDS, tokenize
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from analyze_messages import read_jsonl
+    from build_message_features import extract_message_features
+    from profile_export import STOPWORDS, tokenize
 
 
 DEFAULT_DATABASE_URL = (

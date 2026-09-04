@@ -4,8 +4,12 @@ import argparse
 import json
 from pathlib import Path
 
-from chatgpt_export import conversation_summary, iter_conversations, iter_messages
-from profile_export import build_profile
+try:
+    from scripts.chatgpt_export import conversation_summary, iter_conversations, iter_messages
+    from scripts.profile_export import build_profile
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from chatgpt_export import conversation_summary, iter_conversations, iter_messages
+    from profile_export import build_profile
 
 
 def main() -> None:

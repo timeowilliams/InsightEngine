@@ -8,7 +8,10 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from analyze_messages import month_from_timestamp, read_jsonl
+try:
+    from scripts.analyze_messages import month_from_timestamp, read_jsonl
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from analyze_messages import month_from_timestamp, read_jsonl
 
 
 QUESTION_TYPE_PATTERNS: dict[str, tuple[str, ...]] = {

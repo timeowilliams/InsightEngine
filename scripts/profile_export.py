@@ -5,7 +5,10 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from chatgpt_export import conversation_entry_names, iter_conversations, iter_messages
+try:
+    from scripts.chatgpt_export import conversation_entry_names, iter_conversations, iter_messages
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from chatgpt_export import conversation_entry_names, iter_conversations, iter_messages
 
 
 STOPWORDS = {
