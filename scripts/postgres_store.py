@@ -3,9 +3,15 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from insightengine.db import DEFAULT_DATABASE_URL, connect, redact_url
 
 try:
     from scripts.analyze_messages import read_jsonl
@@ -15,11 +21,6 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct script executi
     from analyze_messages import read_jsonl
     from build_message_features import extract_message_features
     from profile_export import STOPWORDS, tokenize
-
-
-DEFAULT_DATABASE_URL = (
-    "postgresql://insightengine:insightengine@localhost:5432/insightengine"
-)
 
 
 SCHEMA_SQL = """
@@ -177,18 +178,6 @@ def add_database_url_arg(parser: argparse.ArgumentParser) -> None:
         default=os.environ.get("DATABASE_URL", DEFAULT_DATABASE_URL),
         help="Postgres connection URL. Defaults to local Docker Compose settings.",
     )
-
-
-def connect(database_url: str):
-    try:
-        import psycopg
-        from psycopg.rows import dict_row
-    except ImportError as exc:
-        raise SystemExit(
-            "Missing dependency: install with `python -m pip install -r requirements.txt`."
-        ) from exc
-
-    return psycopg.connect(database_url, row_factory=dict_row)
 
 
 def init_db(database_url: str) -> None:
@@ -519,14 +508,6 @@ def analyze_db(
                 }
 
             return result
-
-
-def redact_url(database_url: str) -> str:
-    if "@" not in database_url or "://" not in database_url:
-        return database_url
-    prefix, rest = database_url.split("://", 1)
-    _, host = rest.rsplit("@", 1)
-    return f"{prefix}://***:***@{host}"
 
 
 if __name__ == "__main__":

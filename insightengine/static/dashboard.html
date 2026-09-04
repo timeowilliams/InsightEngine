@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>InsightEngine</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">InsightEngine</p>
+        <h1>Cognitive Mirror Dashboard</h1>
+      </div>
+      <div class="status" id="healthStatus">Checking</div>
+    </header>
+
+    <main class="layout">
+      <section class="metrics" aria-label="Overview metrics">
+        <article>
+          <span>Conversations</span>
+          <strong id="conversationCount">-</strong>
+        </article>
+        <article>
+          <span>Messages</span>
+          <strong id="messageCount">-</strong>
+        </article>
+        <article>
+          <span>User Messages</span>
+          <strong id="userMessageCount">-</strong>
+        </article>
+        <article>
+          <span>Avg User Words</span>
+          <strong id="averageWords">-</strong>
+        </article>
+      </section>
+
+      <section class="panel wide">
+        <div class="panelHeader">
+          <h2>Monthly Activity</h2>
+          <span>user messages</span>
+        </div>
+        <div id="monthlyChart" class="barChart" aria-label="Monthly user message chart"></div>
+      </section>
+
+      <section class="grid">
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Question Types</h2>
+            <span>heuristic labels</span>
+          </div>
+          <div id="questionTypes" class="rankList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Search</h2>
+            <span>conversation matches</span>
+          </div>
+          <form id="searchForm" class="searchForm">
+            <input id="searchInput" name="query" type="search" value="robotics" autocomplete="off">
+            <button type="submit">Search</button>
+          </form>
+          <div id="searchResults" class="rankList compact"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
