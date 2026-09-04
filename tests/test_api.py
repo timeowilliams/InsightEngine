@@ -55,6 +55,51 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.json()["matching_conversations"], 1)
         search_conversations.assert_called_once()
 
+    def test_richer_stats_endpoints_delegate_to_repositories(self) -> None:
+        with patch("insightengine.api.get_top_terms_by_month") as top_terms:
+            top_terms.return_value = {"months": []}
+            response = TestClient(app).get("/stats/top-terms-by-month")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"months": []})
+
+        with patch("insightengine.api.get_workflow_trends") as workflow:
+            workflow.return_value = {"workflow_trends": []}
+            response = TestClient(app).get("/stats/workflow-trends")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"workflow_trends": []})
+
+        with patch("insightengine.api.get_code_signals") as code_signals:
+            code_signals.return_value = {"totals": {}, "top_conversations": []}
+            response = TestClient(app).get("/stats/code-signals")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"totals": {}, "top_conversations": []})
+
+        with patch("insightengine.api.get_yearly_length") as yearly:
+            yearly.return_value = {"yearly_length": []}
+            response = TestClient(app).get("/stats/yearly-length")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"yearly_length": []})
+
+    def test_topic_summary_delegates_to_repository(self) -> None:
+        with patch("insightengine.api.summarize_topic") as summarize_topic:
+            summarize_topic.return_value = {
+                "query": "robotics",
+                "matching_conversations": 1,
+                "total_user_message_hits": 2,
+                "top_matching_conversations": [],
+                "monthly_hits": [],
+                "question_type_counts": {},
+            }
+
+            response = TestClient(app).get(
+                "/topics/summary",
+                params={"query": "robotics"},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["matching_conversations"], 1)
+        summarize_topic.assert_called_once()
+
     def test_dashboard_serves_html(self) -> None:
         response = TestClient(app).get("/")
 

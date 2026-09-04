@@ -5,6 +5,10 @@ const endpoints = {
   overview: "/stats/overview",
   monthlyTrends: "/stats/monthly-trends",
   questionTypes: "/stats/question-types",
+  workflowTrends: "/stats/workflow-trends",
+  yearlyLength: "/stats/yearly-length",
+  codeSignals: "/stats/code-signals",
+  topTermsByMonth: "/stats/top-terms-by-month?months=6&limit=6",
   search: (query) => `/search?query=${encodeURIComponent(query)}`,
 };
 
@@ -86,6 +90,23 @@ function renderRankList(containerId, entries, valueLabel = "count") {
   );
 }
 
+function renderMiniMetrics(containerId, metrics) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren(
+    ...metrics.map(([label, value]) => {
+      const item = document.createElement("div");
+      const name = document.createElement("span");
+      const number = document.createElement("strong");
+
+      item.className = "miniMetric";
+      name.textContent = label;
+      number.textContent = formatNumber.format(value ?? 0);
+      item.append(name, number);
+      return item;
+    }),
+  );
+}
+
 function renderQuestionTypes(data) {
   renderRankList("questionTypes", Object.entries(data.question_type_counts ?? {}), "messages");
 }
@@ -96,6 +117,87 @@ function renderSearch(data) {
     row.hit_count,
   ]);
   renderRankList("searchResults", entries, "hits");
+}
+
+function renderWorkflowTrends(data) {
+  const container = document.getElementById("workflowTrends");
+  const rows = data.workflow_trends ?? [];
+  const recentRows = rows.slice(-12).reverse();
+  const header = document.createElement("div");
+
+  header.className = "trendRow trendHeader";
+  ["Month", "Debug", "Plan", "Code"].forEach((label) => {
+    const cell = document.createElement(label === "Month" ? "span" : "strong");
+    cell.textContent = label;
+    header.append(cell);
+  });
+  container.replaceChildren(
+    header,
+    ...recentRows.map((row) => {
+      const item = document.createElement("div");
+      const month = document.createElement("span");
+
+      item.className = "trendRow";
+      month.textContent = row.month;
+      item.append(month);
+      [row.debugging_messages, row.planning_messages, row.code_block_messages].forEach(
+        (value) => {
+          const count = document.createElement("strong");
+          count.textContent = formatNumber.format(value ?? 0);
+          item.append(count);
+        },
+      );
+      return item;
+    }),
+  );
+}
+
+function renderYearlyLength(data) {
+  const entries = (data.yearly_length ?? []).map((row) => [
+    `${row.year} avg words`,
+    row.average_words,
+  ]);
+  renderRankList("yearlyLength", entries, "avg");
+}
+
+function renderCodeSignals(data) {
+  const totals = data.totals ?? {};
+  renderMiniMetrics("codeSignalMetrics", [
+    ["Code block messages", totals.code_block_messages],
+    ["Debugging messages", totals.debugging_messages],
+    ["Error mentions", totals.error_mentions],
+    ["Technical conversations", totals.technical_conversations],
+  ]);
+
+  const entries = (data.top_conversations ?? []).map((row) => [
+    row.conversation_id,
+    row.code_block_messages + row.debugging_messages + row.error_mentions,
+  ]);
+  renderRankList("codeSignalConversations", entries, "signals");
+}
+
+function renderTermsByMonth(data) {
+  const container = document.getElementById("termsByMonth");
+  container.replaceChildren(
+    ...(data.months ?? []).map((month) => {
+      const section = document.createElement("section");
+      const label = document.createElement("h3");
+      const terms = document.createElement("div");
+
+      section.className = "termMonth";
+      label.textContent = month.month;
+      terms.className = "termList";
+      terms.replaceChildren(
+        ...month.top_terms.map((item) => {
+          const term = document.createElement("span");
+          term.textContent = `${item.term} ${formatNumber.format(item.count)}`;
+          return term;
+        }),
+      );
+      section.append(label, terms);
+      return section;
+    }),
+  );
 }
 
 async function runSearch(query) {
@@ -120,15 +222,31 @@ async function loadDashboard() {
     throw error;
   }
 
-  const [overview, monthlyTrends, questionTypes] = await Promise.all([
+  const [
+    overview,
+    monthlyTrends,
+    questionTypes,
+    workflowTrends,
+    yearlyLength,
+    codeSignals,
+    topTermsByMonth,
+  ] = await Promise.all([
     fetchJson(endpoints.overview),
     fetchJson(endpoints.monthlyTrends),
     fetchJson(endpoints.questionTypes),
+    fetchJson(endpoints.workflowTrends),
+    fetchJson(endpoints.yearlyLength),
+    fetchJson(endpoints.codeSignals),
+    fetchJson(endpoints.topTermsByMonth),
   ]);
 
   renderOverview(overview);
   renderMonthlyTrends(monthlyTrends);
   renderQuestionTypes(questionTypes);
+  renderWorkflowTrends(workflowTrends);
+  renderYearlyLength(yearlyLength);
+  renderCodeSignals(codeSignals);
+  renderTermsByMonth(topTermsByMonth);
   await runSearch(document.getElementById("searchInput").value);
 }
 

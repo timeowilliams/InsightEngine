@@ -8,11 +8,15 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from insightengine.db import check_database, database_url
-from insightengine.repositories.search import search_conversations
+from insightengine.repositories.search import search_conversations, summarize_topic
 from insightengine.repositories.stats import (
+    get_code_signals,
     get_monthly_trends,
     get_overview,
     get_question_types,
+    get_top_terms_by_month,
+    get_workflow_trends,
+    get_yearly_length,
 )
 
 
@@ -55,6 +59,37 @@ def question_types() -> dict[str, Any]:
     return get_question_types(DATABASE_URL)
 
 
+@app.get("/stats/top-terms-by-month")
+def top_terms_by_month(
+    months: int = Query(default=12, ge=1, le=36),
+    limit: int = Query(default=8, ge=1, le=25),
+) -> dict[str, Any]:
+    return get_top_terms_by_month(DATABASE_URL, months=months, limit=limit)
+
+
+@app.get("/stats/workflow-trends")
+def workflow_trends() -> dict[str, Any]:
+    return get_workflow_trends(DATABASE_URL)
+
+
+@app.get("/stats/code-signals")
+def code_signals(limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
+    return get_code_signals(DATABASE_URL, limit=limit)
+
+
+@app.get("/stats/yearly-length")
+def yearly_length() -> dict[str, Any]:
+    return get_yearly_length(DATABASE_URL)
+
+
 @app.get("/search")
 def search(query: str = Query(min_length=1, max_length=200)) -> dict[str, Any]:
     return search_conversations(DATABASE_URL, query)
+
+
+@app.get("/topics/summary")
+def topic_summary(
+    query: str = Query(min_length=1, max_length=200),
+    limit: int = Query(default=10, ge=1, le=50),
+) -> dict[str, Any]:
+    return summarize_topic(DATABASE_URL, query, limit=limit)

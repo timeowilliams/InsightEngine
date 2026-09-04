@@ -261,6 +261,93 @@ button:hover {
   font-size: 13px;
 }
 
+.trendTable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trendRow {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) repeat(3, minmax(48px, auto));
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid #edf0f4;
+  font-size: 13px;
+}
+
+.trendRow strong {
+  text-align: right;
+}
+
+.trendHeader {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.miniMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.miniMetric {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #edf0f4;
+  border-radius: 6px;
+  background: #fbfcfd;
+}
+
+.miniMetric span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.miniMetric strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 19px;
+}
+
+.termMonths {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.termMonth {
+  display: grid;
+  gap: 7px;
+}
+
+.termMonth h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.termList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.termList span {
+  padding: 5px 7px;
+  border-radius: 5px;
+  background: #eef2f6;
+  color: var(--text);
+  font-size: 12px;
+}
+
 @media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
@@ -279,5 +366,9 @@ button:hover {
 
   .barChart {
     gap: 5px;
+  }
+
+  .miniMetrics {
+    grid-template-columns: 1fr;
   }
 }
